@@ -9,7 +9,18 @@ import sys
 from decimal import Decimal
 secperday = 3600 * 24
 
-filename = sys.argv[1]
+if (len(sys.argv)<4):
+  print 'too few input parameters!'
+  print 'example:'
+  print 'python fitsio_cut_freq_time_splitpol.py startn endn startchan endchan FAST.fits'
+  sys.exit()
+
+startn=int(sys.argv[1])
+endn=int(sys.argv[2])
+startfreq=int(sys.argv[3])
+endfreq=int(sys.argv[4])
+filename=sys.argv[5]
+
 
 hdulist = pyfits.open(filename)
 print 'hdu list length', len(hdulist) 
@@ -53,18 +64,19 @@ print 'fch1, df', fch1, df
 print 'data.shape:', data1.shape
 
 a,b,c,d,e = data1.shape
+d = (endfreq - startfreq)
 if c > 1:
-    data = data1[:,:,0,:,:].squeeze().reshape((-1,d))
+    data = data1[startn:endn,:,0,startfreq:endfreq,:].squeeze().reshape((-1,d))
 else:
     data = data1.squeeze().reshape((-1,d))
 l, m = data.shape
-data = data.reshape(l/64, 64, d).sum(axis=1)
 print data.shape
+#data = data.reshape(l/64, 64, d).sum(axis=1)
 #data -= data.mean(axis=0).transpose().astype(np.uint64)
 
 from pylab import *
-imshow(data.T, aspect='auto')
-#colorbar()
+imshow(data.T, aspect='auto',cmap=get_cmap("hot"),origin="lower" )
+colorbar()
 #plot(data.sum(axis=0))
 #plot(data.sum(axis=1))
 show()

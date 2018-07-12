@@ -24,7 +24,8 @@ plotbinary.py: plot one channel of the binary file(create by simulateSimplePsr_m
 usage: python *.py binaryfile
 
 plotfits.py: plot fast fits files. 
-usage: python *.py filename
+    python *.py startsubint endsubint startchannel endchannel FAST.fits
+    python *.py 0 31 1000 3000 FAST.fits
 
 fits_combinePolBinary.py: combine fits file with binary file to a new file with one pol
 usage: python *.py fitsfile binaryfile combinedfile

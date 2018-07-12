@@ -9,19 +9,21 @@ import sys
 from decimal import Decimal
 secperday = 3600 * 24
 
-if (len(sys.argv)==2):
+if (len(sys.argv)==6):
     starttime=datetime.datetime.now()
     print 'record start time:',starttime
-else:
-    print """
-usage: %s filename
-This will out put a png file in 
-current dir.
-          """ % sys.argv[0]
 
-    sys.exit()
+if (len(sys.argv)<4):
+  print 'too few input parameters!'
+  print 'example:'
+  print 'python *.py startn endn startchan endchan FAST.fits'
+  sys.exit()
 
-filename = sys.argv[1]
+startn=int(sys.argv[1])
+endn=int(sys.argv[2])
+startfreq=int(sys.argv[3])
+endfreq=int(sys.argv[4])
+filename=sys.argv[5]
 
 
 hdulist = pyfits.open(filename)
@@ -70,26 +72,33 @@ from matplotlib.ticker import  MultipleLocator
 
 switch_backend('ps')
 a,b,c,d,e = data1.shape
+d = (endfreq - startfreq)
 fig = figure(figsize=(16,12*c), dpi=80)
 for i in range(c):
-    data = data1[:,:,i,:,:].squeeze().reshape((-1,d))
-    l, m = data.shape
-    data = data.reshape(l/64, 64, d).sum(axis=1)
+    #data = data1[:,:,i,:,:].squeeze().reshape((-1,d))
+    data = data1[startn:endn,:,0,startfreq:endfreq,:].squeeze().reshape((-1,d))
+    #l, m = data.shape
+    #data = data.reshape(l/64, 64, d).sum(axis=1)
     bandpass = np.sum(data,axis=0)
     print data.shape
     #data -= data.mean(axis=0).transpose().astype(np.uint64)
     subplotnum=int(str(2*c)+'1'+str(2*i+1))
     ax=fig.add_subplot(subplotnum)
-    ax.imshow(data.T, aspect='auto')
+    #ax.imshow(data.T, aspect='auto')
+    ax.imshow(data.T, aspect='auto',cmap=get_cmap("hot"),origin="lower" )
+    #ax.colorbar()
     ax.set_ylabel('num of channel  '+'pol'+str(i+1))
     ax.set_xlim(0.,tsamp*nsamp)
-    if i < 1 : title(filename.split('/')[-1])
+    if i < 1 :
+        title(filename.split('/')[-1])
     
     subplotnum=int(str(2*c)+'1'+str(2*i+2))
     ax=fig.add_subplot(subplotnum)
-    ax.plot(bandpass)
+    ax.plot(np.arange(startfreq,endfreq),bandpass)
     ax.set_ylabel('bandpass of '+'pol'+str(i+1))
-    ax.set_xlim(0.,obsnchan)
+    ax.set_xlabel('channel')
+    #ax.set_xlim(0.,d)
+    ax.set_xlim(startfreq,endfreq)
     #colorbar()
     #plot(data.sum(axis=0))
     #plot(data.sum(axis=1))
