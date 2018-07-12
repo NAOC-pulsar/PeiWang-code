@@ -1,0 +1,56 @@
+
+===============================
+  FAST脉冲星计时（Timing）操作流程
+===============================
+
+（对于跟踪数据，可对单次连续观测多个观测文件计时，也可采用多天多次的数据进行较长时间跨度计时；对于漂移扫描观测，只能采用多天多次的数据计时。）
+
+
+所需软件：Shell、Python、Psrcat、Dspsr、Psrchive、Tempo2，及Pgplot、py库等配合程序。
+
+软件准备：
+
+- 计时处理软件的站点信息添加：
+添加到$TEMPO2/observatory/observatories.dat的最后一行，但目前值为手机GPS测量的望远镜坐标原点，并不准确，以后还依赖VLBI测量。目前至少馈源高度的百米差值在ToA上表现为10^-6s的钟差。
+###For FAST Temporarily #####
+-166850.0       5506860.0       2744940.0        FAST                fast
+
+- 计时处理软件的时钟修正添加：（毫微秒级）
+测时还需 Tempo2 中添加对站点时钟的修正,在$TEMPO2/clock/目录,添加 fast2gps.clk 文件。在 par 文件中添加: CLK_CORR_CHAIN fast2gps.clk, gps2utc.clk,utc2tai.clk, tai2tt_tai.clk
+
+
+————————————————————————————————————————————————————————————————————————————————
+
+1. 根据观测日志统计已观测脉冲星的时间和次数（跟踪观测和漂移扫描均可），确保数据集中有对应文件，0-1GHz既可。
+
+2. 挑出包含脉冲星的数据文件。对跟踪数据，任一文件都包含脉冲星信号。对漂移扫描，使用源到达程序“FAST_source_arrival_time”计算源到达中天时刻，并找到相应的数据。
+
+3. 在集群个人账户内，根据源名称建文件夹，文件夹内使用ln -s链接对应脉冲星数据文件。
+
+4. 使用切文件程序“cut.sh和cut_FASTpsrfits_freq_time_splitpol.py”对数据的频率范围，按照接收机和干扰情况进行批量切割，进行预处理并输出新fits。
+
+5. 根据源折叠参数（P0、DM），使用fold.sh在同层目录对*fits进行dspsr折叠和psrchive消干扰和频率、时间积分，产生.FTp脉冲轮廓文件。如果轮廓信噪比不高，使用Pdmp优化折叠参数（P0、DM）后，进行再次批量折叠，最优化脉冲轮廓。
+
+6. 使用pav -D *FTp检查平均脉冲轮廓，删除无信号的fits、ar、arz、FTp文件。
+
+7. 对FTp文件进行时间补偿，ls *FTp > FTplist.txt, 运行Modmjd.sh更新FTp文件的stt_imjd,stt_smjd,stt_offs时间变量。
+
+8. 选取最大信噪比脉冲轮廓FTp作为计算ToA模板：cp xxx.FTp xxx.std
+
+9. 产生计时源的星历psrcat -e2 xxx > xxx.par，删除par中误差等多余信息，对于新脉冲星可直接编写par。
+
+10. 计算每个FTp文件的脉冲到达时间ToA，以Tempo2格式输出：pat -f “tempo2 i” -s xxx.std *FTp > xxx.tim
+
+11. 使用Tempo2做参数拟合残差分布，给出计时结果：tempo2 -gr plk -f xxx.par xxx.tim (需要图形界面Xwindow)
+
+12. 得到残差为白噪声的new.par文件，使用psradd命令 把好数据.FT 文件（按照new.par参数)连接，得到new.std，再用pam命令把new.std叠加得到总积分轮廓。
+  psradd -F -E new.par `std.txt` -o new.std 
+  其中std.txt 的内容就是 那些好数据的文件名，多个.FTp文件名。
+  pam -DFTp -m new.std
+
+13. 通过残差拟合更新par文件，重新折叠，产生ToA后再次运行Tempo2计时，直到结果无法进一步改善。
+
+
+*  对于计时调试阶段需,首先检查单次连续观测多个观测文件整秒补偿stt_offs的一致性:vap -c stt_imjd,stt_smjd,stt_offs *.arz。
+** 完成结果后，尽量删除ar，仅保留FTp，arz文件，节省存储空间。
+
