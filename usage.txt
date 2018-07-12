@@ -1,0 +1,30 @@
+fitsio_cutfreq.py: cut file only have one pol. 
+usage: python *.py filename startfref endfref newfile
+
+fitsio_cut_freq_time_splitpol.py: cut file have two pols. 
+usage: python *.py filename startchan endchan startTime endTime filename
+
+fastFitsCut.py: cut file have two pols.
+Same function as fitsio_cut_freq_time_splitpol.py but more faster.
+usage: 
+    python *.py [-f1 startchannel] [-f2 endchannel] [-t1 startsubint] [-t2 endsubint] FAST.fits
+    python *.py -[help/version]
+example:
+    python fastFitsCut.py -f1 1000 -f2 3000 -t1 0 -t2 31 FAST.fits
+    python fastFitsCut.py -f1 1000 FAST.fits (From channel 1000 to end. All subint)
+    (if someone lost, the input will be set to a default num.)
+
+get_bandpass.py: get bandpass from fits file. 
+usage: def function can be found in fitsio_combinePolBinary.py
+
+get_nos.py: get signal and noise from fits file. 
+usage: def function can be found in fitsio_combinePolBinary.py
+
+plotbinary.py: plot one channel of the binary file(create by simulateSimplePsr_mcc). 
+usage: python *.py binaryfile
+
+plotfits.py: plot fast fits files. 
+usage: python *.py filename
+
+fits_combinePolBinary.py: combine fits file with binary file to a new file with one pol
+usage: python *.py fitsfile binaryfile combinedfile
