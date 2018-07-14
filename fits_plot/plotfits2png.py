@@ -103,14 +103,15 @@ for i in range(c):
     #ax.colorbar()
     ax.set_ylabel('num of channel  '+'pol'+str(i+1))
     ax.set_xlim(0.,tsamp*nsamp)
-    if i < 1 :
-        title(filename.split('/')[-1])
+    #if i < 1 :
+    #    title(filename.split('/')[-1])
     
     #subplotnum=int(str(2*c)+'1'+str(2*i+2))
     subplotnum=int(str(c)+str(c)+str(2*i+2))
     ax=fig.add_subplot(subplotnum)
     ax.plot(np.arange(startfreq,endfreq),bandpass)
-    ax.set_ylabel('bandpass of '+'pol'+str(i+1))
+    title('bandpass of '+'pol'+str(i+1))
+    #ax.set_ylabel('bandpass of '+'pol'+str(i+1))
     ax.set_xlabel('channel')
     #ax.set_xlim(0.,d)
     ax.set_xlim(startfreq,endfreq)
@@ -118,7 +119,7 @@ for i in range(c):
     #plot(data.sum(axis=0))
     #plot(data.sum(axis=1))
     #show()
-xlabel('time (s)')
+#xlabel('time (s)')
 imgfilename=(filename.split('/')[-1])[:-5]+'.png'
 print "img file name", imgfilename
 savefig(imgfilename)
