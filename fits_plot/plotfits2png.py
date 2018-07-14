@@ -14,10 +14,10 @@ if (len(sys.argv)==6):
     print 'record start time:',starttime
 
 if (len(sys.argv)<4):
-  print 'too few input parameters!'
-  print 'example:'
-  print 'python *.py startn endn startchan endchan FAST.fits'
-  sys.exit()
+    print 'too few input parameters!'
+    print 'example:'
+    print 'python *.py startn endn startchan endchan FAST.fits'
+    sys.exit()
 
 startn=int(sys.argv[1])
 endn=int(sys.argv[2])
@@ -34,8 +34,8 @@ hdu1 = hdulist[1]
 data1 = hdu1.data['data']
 #data2 = hdu2.data
 header1 = hdu1.header
-print hdu0.header
-print hdu1.header
+#print hdu0.header
+#print hdu1.header
 print data1.shape
 
 fchannel = hdulist['SUBINT'].data[0]['DAT_FREQ']
@@ -61,11 +61,24 @@ nbits = hdu0.header['BITPIX']
 header = hdu0.header + hdu1.header
 dtype = ''
 
+#File information out put
+#name, mjd, time, freq
+
+name = filename
+mjd = str(tstart)
+time = str(' time: %s s' % ((endn - startn)*samppersubint*tsamp))
+freq = str('Freq: %sMHz - %sMHz' % (fch1+startfreq*obsbw, fch1+endfreq*obsbw))
+
 print 'freq %s MHz, nchan %d, bw %s MHz' % ( obsfreq, obsnchan, obsbw)
 print 'MJD:', tstart
 print 'fch1, df', fch1, df 
 print 'file length %f tsamp %f nsamp %f' %(tsamp*nsamp,tsamp,nsamp)
 print 'data.shape:', data1.shape
+
+# ASCII file out
+bandpassfilename=(filename.split('/')[-1])[:-5]+'.bandpass'
+print "bandpass file name: %s " %(bandpassfilename)
+
 
 from pylab import *
 from matplotlib.ticker import  MultipleLocator
@@ -76,13 +89,14 @@ d = (endfreq - startfreq)
 fig = figure(figsize=(16,12*c), dpi=80)
 for i in range(c):
     #data = data1[:,:,i,:,:].squeeze().reshape((-1,d))
-    data = data1[startn:endn,:,0,startfreq:endfreq,:].squeeze().reshape((-1,d))
+    data = data1[startn:endn,:,i,startfreq:endfreq,:].squeeze().reshape((-1,d))
     #l, m = data.shape
     #data = data.reshape(l/64, 64, d).sum(axis=1)
     bandpass = np.sum(data,axis=0)
     print data.shape
     #data -= data.mean(axis=0).transpose().astype(np.uint64)
-    subplotnum=int(str(2*c)+'1'+str(2*i+1))
+    #subplotnum=int(str(2*c)+'1'+str(2*i+1))
+    subplotnum=int(str(2*c)+str(i+1)+str(1))
     ax=fig.add_subplot(subplotnum)
     #ax.imshow(data.T, aspect='auto')
     ax.imshow(data.T, aspect='auto',cmap=get_cmap("hot"),origin="lower" )
@@ -92,7 +106,8 @@ for i in range(c):
     if i < 1 :
         title(filename.split('/')[-1])
     
-    subplotnum=int(str(2*c)+'1'+str(2*i+2))
+    #subplotnum=int(str(2*c)+'1'+str(2*i+2))
+    subplotnum=int(str(2*c)+str(i+1)+str(2))
     ax=fig.add_subplot(subplotnum)
     ax.plot(np.arange(startfreq,endfreq),bandpass)
     ax.set_ylabel('bandpass of '+'pol'+str(i+1))
