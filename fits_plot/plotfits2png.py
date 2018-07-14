@@ -86,7 +86,7 @@ from matplotlib.ticker import  MultipleLocator
 switch_backend('ps')
 a,b,c,d,e = data1.shape
 d = (endfreq - startfreq)
-fig = figure(figsize=(16,12*c), dpi=80)
+fig = figure(figsize=(16,4.5*c), dpi=80)
 for i in range(c):
     #data = data1[:,:,i,:,:].squeeze().reshape((-1,d))
     data = data1[startn:endn,:,i,startfreq:endfreq,:].squeeze().reshape((-1,d))
