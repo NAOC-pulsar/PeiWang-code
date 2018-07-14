@@ -96,7 +96,7 @@ for i in range(c):
     print data.shape
     #data -= data.mean(axis=0).transpose().astype(np.uint64)
     #subplotnum=int(str(2*c)+'1'+str(2*i+1))
-    subplotnum=int(str(c)+str(i+1)+str(1))
+    subplotnum=int(str(c)+str(c)+str(2*i+1))
     ax=fig.add_subplot(subplotnum)
     #ax.imshow(data.T, aspect='auto')
     ax.imshow(data.T, aspect='auto',cmap=get_cmap("hot"),origin="lower" )
@@ -107,7 +107,7 @@ for i in range(c):
         title(filename.split('/')[-1])
     
     #subplotnum=int(str(2*c)+'1'+str(2*i+2))
-    subplotnum=int(str(c)+str(i+1)+str(2))
+    subplotnum=int(str(c)+str(c)+str(2*i+2))
     ax=fig.add_subplot(subplotnum)
     ax.plot(np.arange(startfreq,endfreq),bandpass)
     ax.set_ylabel('bandpass of '+'pol'+str(i+1))
