@@ -9,8 +9,6 @@ import sys
 from decimal import Decimal
 secperday = 3600 * 24
 
-np.set_printoptions(suppress=True)
-
 if (len(sys.argv)==6):
     starttime=datetime.datetime.now()
     print 'record start time:',starttime
@@ -161,10 +159,9 @@ clf()
 #savefig(imgfilename)
 
 f = open(bandpassfilename, 'w')
-f.write('MHz       pol1       pol2\n')
-for i in range(d):
-    f.write(str(bandpassout[i,:]).strip('[').strip(']').strip()+'\n')
-f.close()
+f.write('MHz    pol1     pol2')
+for a in bandpassout:
+    print a
 #print bandpassout
 
 endtime=datetime.datetime.now()
