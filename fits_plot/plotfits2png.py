@@ -11,22 +11,27 @@ secperday = 3600 * 24
 
 np.set_printoptions(suppress=True)
 
-if (len(sys.argv)==6):
+#check input
+if (len(sys.argv)==2):
+    filename=sys.argv[1]
+
+elif (len(sys.argv)==6):
+    startn=int(sys.argv[1])
+    endn=int(sys.argv[2])
+    startfreq=int(sys.argv[3])
+    endfreq=int(sys.argv[4])
+    filename=sys.argv[5]
     starttime=datetime.datetime.now()
     print 'record start time:',starttime
-
-if (len(sys.argv)<6):
+else :
     print 'too few input parameters!'
     print 'example:'
     print 'python *.py startn endn startchan endchan FAST.fits'
     sys.exit()
 
-startn=int(sys.argv[1])
-endn=int(sys.argv[2])
-startfreq=int(sys.argv[3])
-endfreq=int(sys.argv[4])
-filename=sys.argv[5]
 
+starttime=datetime.datetime.now()
+print 'record start time:',starttime
 
 hdulist = pyfits.open(filename)
 print 'hdu list length', len(hdulist) 
@@ -65,15 +70,23 @@ dtype = ''
 
 
 #input check 
-if startn < 0 or startn >= endn : 
-    startn = 0 
-if endn >= nsubint:
-    endn = nsubint-1
 
-if startfreq < 0 or startfreq >= endfreq : 
+if (len(sys.argv)==2):
+    startn = 0 
+    endn = nsubint-1
     startfreq = 0 
-if endfreq >= nf:
     endn = nf-1
+
+else:
+    if startn < 0 or startn >= endn : 
+        startn = 0 
+    if endn >= nsubint or endn < 0:
+        endn = nsubint-1
+    
+    if startfreq < 0 or startfreq >= endfreq : 
+        startfreq = 0 
+    if endfreq >= nf endfreq < 0:
+        endn = nf-1
 
 
 #File information out put
