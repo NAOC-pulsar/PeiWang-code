@@ -15,7 +15,7 @@ if (len(sys.argv)==6):
     starttime=datetime.datetime.now()
     print 'record start time:',starttime
 
-if (len(sys.argv)<4):
+if (len(sys.argv)<6):
     print 'too few input parameters!'
     print 'example:'
     print 'python *.py startn endn startchan endchan FAST.fits'
@@ -63,6 +63,19 @@ nbits = hdu0.header['BITPIX']
 header = hdu0.header + hdu1.header
 dtype = ''
 
+
+#input check 
+if startn < 0 or startn >= endn : 
+    startn = 0 
+if endn >= nsubint:
+    endn = nsubint-1
+
+if startfreq < 0 or startfreq >= endfreq : 
+    startfreq = 0 
+if endfreq >= nf:
+    endn = nf-1
+
+
 #File information out put
 #name, mjd, time, freq
 
@@ -92,7 +105,8 @@ d = (endfreq - startfreq)
 bandpassout = np.zeros((d,c+1))
 for i in range(d): bandpassout[i,0] = fch1+(startfreq+i)*df
 fig = figure(figsize=(16,4.5*c), dpi=80)
-fig.text(0.1,0.91,name+"\n"+mjd+"\n"+time+"       "+freq, fontsize = 15)
+fig.text(0.1,0.91,name+"\n"+mjd, fontsize = 15)
+fig.text(0.5,0.91,time+"\n"+freq, fontsize = 15)
 for i in range(c):
     #data = data1[:,:,i,:,:].squeeze().reshape((-1,d))
     data = data1[startn:endn,:,i,startfreq:endfreq,:].squeeze().reshape((-1,d))
