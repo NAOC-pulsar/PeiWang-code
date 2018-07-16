@@ -85,7 +85,7 @@ else:
     
     if startfreq < 0 or startfreq >= endfreq : 
         startfreq = 0 
-    if endfreq >= nf endfreq < 0:
+    if endfreq >= nf or endfreq < 0:
         endn = nf-1
 
 
