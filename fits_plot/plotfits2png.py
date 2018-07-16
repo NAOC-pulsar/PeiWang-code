@@ -75,7 +75,7 @@ if (len(sys.argv)==2):
     startn = 0 
     endn = nsubint-1
     startfreq = 0 
-    endn = nf-1
+    endfreq = nf-1
 
 else:
     if startn < 0 or startn >= endn : 
@@ -86,7 +86,7 @@ else:
     if startfreq < 0 or startfreq >= endfreq : 
         startfreq = 0 
     if endfreq >= nf or endfreq < 0:
-        endn = nf-1
+        endfreq = nf-1
 
 
 #File information out put
