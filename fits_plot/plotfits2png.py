@@ -2,11 +2,15 @@
 import numpy as np  
 #import pyfits
 import astropy.io.fits as pyfits
+from astropy.time import Time
 import os
-import datetime
+import datetime as dt
+from datetime import datetime
 import time
 import sys 
+import string
 from decimal import Decimal
+from decimal import getcontext
 secperday = 3600 * 24
 
 np.set_printoptions(suppress=True)
@@ -21,7 +25,7 @@ elif (len(sys.argv)==6):
     startfreq=int(sys.argv[3])
     endfreq=int(sys.argv[4])
     filename=sys.argv[5]
-    starttime=datetime.datetime.now()
+    starttime=datetime.now()
     print 'record start time:',starttime
 else :
     print 'too few input parameters!'
@@ -30,7 +34,7 @@ else :
     sys.exit()
 
 
-starttime=datetime.datetime.now()
+starttime=datetime.now()
 print 'record start time:',starttime
 
 hdulist = pyfits.open(filename)
@@ -63,7 +67,26 @@ ra = hdu0.header['RA']
 dec = hdu0.header['DEC']
 #tstart = Decimal("%d.%d" % (hdu0.header['STT_IMJD'], hdu0.header['STT_SMJD']))
 subintoffset = hdu1.header['NSUBOFFS']
-tstart = "%.13f" % (Decimal(hdu0.header['STT_IMJD']) + Decimal(hdu0.header['STT_SMJD'] + tsamp * samppersubint * subintoffset )/secperday )
+#Ultra-wide band receiver
+#tstart = "%.13f" % (Decimal(hdu0.header['STT_IMJD']) + Decimal(hdu0.header['STT_SMJD'] + tsamp * samppersubint * subintoffset )/secperday )
+#19-beams
+tstart = "%.13f" % (Decimal(hdu0.header['STT_IMJD']) + (Decimal(hdu0.header['STT_SMJD']) + Decimal(hdu0.header['STT_OFFS']) )/secperday)
+# 
+
+# Transfer Fits header MJD --> UTC time
+#Starttime = string.atof(tstart)
+Starttime = float(tstart)
+t_header = Time(Starttime,format='mjd',scale='utc')
+tmp_t_header = str(t_header.datetime).split('.')
+if tmp_t_header.__len__() == 1:
+    tmp_t_header[0] = tmp_t_header[0] + '.000001'
+else:
+    tmp_t_header[0] = tmp_t_header[0] + '.' + tmp_t_header[1]
+
+Starttime_utc = datetime.strptime(tmp_t_header[0],"%Y-%m-%d %H:%M:%S.%f")
+Starttime_BJ = Starttime_utc + dt.timedelta(hours=8)
+print Starttime_BJ
+
 nbits = hdu0.header['BITPIX']
 header = hdu0.header + hdu1.header
 dtype = ''
@@ -194,7 +217,8 @@ for i in range(d):
 f.close()
 #print bandpassout
 
-endtime=datetime.datetime.now()
+#endtime=datetime.now()
+endtime=dt.datetime.now()
 print 'START:',starttime
 print 'END:',endtime
 print 'DURATION:',(endtime-starttime).seconds,' sec'
