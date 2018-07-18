@@ -107,9 +107,9 @@ else:
         endn = nsubint-1
     
     if startfreq < 0 or startfreq >= endfreq : 
-        startfreq = 0 
+        startfreq = 400 
     if endfreq >= nf or endfreq < 0:
-        endfreq = nf-1
+        endfreq = nf-1-400
 
 
 #File information out put
@@ -117,8 +117,9 @@ else:
 
 name = 'filename: '+filename.split('/')[-1]
 mjd = str('MJD: %s' %(tstart))
-time = str('plot length: %s s' % ((endn - startn)*samppersubint*tsamp))
-freq = str('plot Frequence: %sMHz - %sMHz' % (fch1+startfreq*df, fch1+endfreq*df))
+time = str('plot length: %s s' % ( (endn - startn)*samppersubint*tsamp) )
+freq = str('plot Frequence: %sMHz - %sMHz' % (round( fch1+startfreq*df, 2 ), round( fch1+endfreq*df, 2 )))
+BJtime = Starttime_BJ
 
 
 print 'freq %s MHz, nchan %d, bw %s MHz' % ( obsfreq, obsnchan, obsbw)
@@ -141,8 +142,8 @@ d = (endfreq - startfreq)
 bandpassout = np.zeros((d,c+1))
 for i in range(d): bandpassout[i,0] = fch1+(startfreq+i)*df
 fig = figure(figsize=(16,4.5*c), dpi=80)
-fig.text(0.1,0.91,name+"\n"+mjd, fontsize = 15)
-fig.text(0.5,0.91,time+"\n"+freq, fontsize = 15)
+fig.text(0.1,0.95,name+"\n"+mjd+"\n"+BJtime, fontsize = 15)
+fig.text(0.5,0.95,time+"\n"+freq, fontsize = 15)
 for i in range(c):
     #data = data1[:,:,i,:,:].squeeze().reshape((-1,d))
     data = data1[startn:endn,:,i,startfreq:endfreq,:].squeeze().reshape((-1,d))
