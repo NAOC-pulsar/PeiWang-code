@@ -97,8 +97,8 @@ dtype = ''
 if (len(sys.argv)==2):
     startn = 0 
     endn = nsubint-1
-    startfreq = 0 
-    endfreq = nf-1
+    startfreq = 400
+    endfreq = nf-1-400
 
 else:
     if startn < 0 or startn >= endn : 
@@ -119,7 +119,8 @@ name = 'filename: '+filename.split('/')[-1]
 mjd = str('MJD: %s' %(tstart))
 time = str('plot length: %s s' % ( (endn - startn)*samppersubint*tsamp) )
 freq = str('plot Frequence: %sMHz - %sMHz' % (round( fch1+startfreq*df, 2 ), round( fch1+endfreq*df, 2 )))
-BJtime = Starttime_BJ
+BJtime = Starttime_BJ.strftime("%Y-%m-%d %H:%M:%S")
+
 
 
 print 'freq %s MHz, nchan %d, bw %s MHz' % ( obsfreq, obsnchan, obsbw)
@@ -134,21 +135,32 @@ print "bandpass file name: %s " %(bandpassfilename)
 
 
 from pylab import *
-from matplotlib.ticker import  MultipleLocator
+#from matplotlib.ticker import  MultipleLocator
 
 switch_backend('ps')
+downsamp = 64
 a,b,c,d,e = data1.shape
 d = (endfreq - startfreq)
 bandpassout = np.zeros((d,c+1))
 for i in range(d): bandpassout[i,0] = fch1+(startfreq+i)*df
 fig = figure(figsize=(16,4.5*c), dpi=80)
-fig.text(0.1,0.95,name+"\n"+mjd+"\n"+BJtime, fontsize = 15)
-fig.text(0.5,0.95,time+"\n"+freq, fontsize = 15)
+fig.text(0.1,0.91,name+"\n"+mjd+"\nBJ Time: "+BJtime, fontsize = 15)
+fig.text(0.5,0.91,time+"\n"+freq, fontsize = 15)
+
+# set plot labels
+floattimelabel = [round(timepoint,1) for timepoint in np.arange(0, (endn - startn)*1.1*samppersubint/downsamp, (endn - startn)*samppersubint/10./downsamp ) ] 
+strtimelabel = [str(round(timepoint,2)) for timepoint in np.arange(startn*samppersubint*tsamp, endn*samppersubint*tsamp+(endn - startn)*samppersubint*tsamp/10, (endn - startn)*samppersubint*tsamp/10.) ]
+
+floatfreqlabel = [round(freqpoint,1) for freqpoint in np.arange(0, (endfreq- startfreq)*1.2, (endfreq - startfreq)/5.) ]
+strfreqlabel = [str(round(freqpoint,0)) for freqpoint in np.arange(fch1+startfreq*df, fch1+endfreq*df+(fch1+endfreq*df - (fch1+startfreq*df))/5, (fch1+endfreq*df - (fch1+startfreq*df))/5.)]
+
 for i in range(c):
     #data = data1[:,:,i,:,:].squeeze().reshape((-1,d))
     data = data1[startn:endn,:,i,startfreq:endfreq,:].squeeze().reshape((-1,d))
-    #l, m = data.shape
-    #data = data.reshape(l/64, 64, d).sum(axis=1)
+    #reshape the data
+    l, m = data.shape
+    data = data.reshape(l/downsamp, downsamp, d).sum(axis=1)
+
     bandpass = np.sum(data,axis=0)
     bandpassout[:,i+1] = bandpass
     print data.shape
@@ -160,10 +172,12 @@ for i in range(c):
     im = ax.imshow(data.T, aspect='auto',cmap=get_cmap("hot"),origin="lower" )
     title('pic of fits'+'pol '+str(i+1), fontsize = 10)
     ax.set_xlabel('time (s)', fontsize = 10)
-    ax.set_ylabel('channel '+'pol'+str(i+1), fontsize = 10)
+    ax.set_ylabel('pol'+str(i+1)+'\n'+'channel(MHz)', fontsize = 10)
     #ax.set_xticklabels([str(round(timepoint,1)) for timepoint in np.arange(startn*samppersubint*tsamp, endn*samppersubint*tsamp, (endn - startn)*samppersubint*tsamp/10) ])
-    xticks([round(timepoint,1) for timepoint in np.arange(startn*samppersubint, endn*samppersubint+(endn - startn)*samppersubint/10, (endn - startn)*samppersubint/10) ], [str(round(timepoint,1)) for timepoint in np.arange(startn*samppersubint*tsamp, endn*samppersubint*tsamp+(endn - startn)*samppersubint*tsamp/10, (endn - startn)*samppersubint*tsamp/10) ])
-    yticks([round(freqpoint,1) for freqpoint in np.arange(0, endfreq- startfreq+(endfreq - startfreq)/5, (endfreq - startfreq)/5) ], [str(round(freqpoint,0)) for freqpoint in np.arange(fch1+startfreq*df, fch1+endfreq*df+(fch1+endfreq*df - (fch1+startfreq*df))/5, (fch1+endfreq*df - (fch1+startfreq*df))/5)])
+    #xlabel set
+    xticks(floattimelabel, strtimelabel)
+    yticks(floatfreqlabel, strfreqlabel)
+
     fig.colorbar(im, ax = ax)
     #ax.set_xlim(startn*samppersubint*tsamp, endn*samppersubint*tsamp)
     #ax.set_ylim(fch1+startfreq*obsbw, fch1+endfreq*obsbw)
@@ -177,7 +191,8 @@ for i in range(c):
     title('bandpass of '+'pol'+str(i+1), fontsize = 10)
     ax.set_ylabel('bandpass of '+'pol'+str(i+1), fontsize = 10)
     ax.set_xlabel('channel', fontsize = 10)
-    xticks([round(freqpoint,1) for freqpoint in np.arange(0, endfreq- startfreq+(endfreq - startfreq)/5, (endfreq - startfreq)/5) ], [str(round(freqpoint,0)) for freqpoint in np.arange(fch1+startfreq*df, fch1+endfreq*df+(fch1+endfreq*df - (fch1+startfreq*df))/5, (fch1+endfreq*df - (fch1+startfreq*df))/5)])
+    xticks(floatfreqlabel, strfreqlabel)
+    #xticks(, [str(round(freqpoint,0)) for freqpoint in np.arange(fch1+startfreq*df, fch1+endfreq*df+(fch1+endfreq*df - (fch1+startfreq*df))/5, (fch1+endfreq*df - (fch1+startfreq*df))/5)])
     #ax.set_xlim(0.,d)
     #ax.set_xlim(fch1+startfreq*obsbw, fch1+endfreq*obsbw)
     #colorbar()
@@ -188,7 +203,7 @@ for i in range(c):
 imgfilename=(filename.split('/')[-1])[:-5]+'.png'
 print "img file name", imgfilename
 savefig(imgfilename)
-clf()
+#clf()
 #if c > 1:
 #    data = data1[:,:,0,:,:].squeeze().reshape((-1,d))
 #else:
