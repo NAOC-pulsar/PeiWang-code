@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import numpy as np  
 #import pyfits
+import numpy as np  
 import astropy.io.fits as pyfits
 from astropy.time import Time
 import os
@@ -20,58 +20,52 @@ if (len(sys.argv)==2):
     filename=sys.argv[1]
 
 elif (len(sys.argv)==6):
-    startn=int(sys.argv[1])
-    endn=int(sys.argv[2])
-    startfreq=int(sys.argv[3])
-    endfreq=int(sys.argv[4])
     filename=sys.argv[5]
-    starttime=datetime.now()
-    print 'record start time:',starttime
+
 else :
-    print 'too few input parameters!'
+    print 'wrong input parameters!'
     print 'example:'
     print 'python *.py startn endn startchan endchan FAST.fits'
+    print 'python *.py FAST.fits'
     sys.exit()
 
 
 starttime=datetime.now()
-print 'record start time:',starttime
+print 'start time:',starttime
 
+#read file
 hdulist = pyfits.open(filename)
-print 'hdu list length', len(hdulist) 
 hdu0 = hdulist[0]
 hdu1 = hdulist[1]
-#hdu2 = hdulist[2]
 data1 = hdu1.data['data']
-#data2 = hdu2.data
 header1 = hdu1.header
-#print hdu0.header
-#print hdu1.header
-print data1.shape
 
 fchannel = hdulist['SUBINT'].data[0]['DAT_FREQ']
 fch1 = fchannel[0]
-obsfreq = hdu0.header['OBSFREQ']
 obsnchan = hdu0.header['OBSNCHAN']
-obsbw = hdu0.header['OBSBW']
-fmin = obsfreq - obsbw/2.
-fmax = obsfreq + obsbw/2.
 nf = obsnchan
 df = hdu1.header['CHAN_BW']
 tsamp = hdu1.header['TBIN']
 nsubint = hdu1.header['NAXIS2']
 samppersubint = int(hdu1.header['NSBLK'])
+
+'''
+obsfreq = hdu0.header['OBSFREQ']
+obsbw = hdu0.header['OBSBW']
+fmin = obsfreq - obsbw/2.
+fmax = obsfreq + obsbw/2.
 nsamp = nsubint * samppersubint
 sourename = hdu0.header['SRC_NAME']
 ra = hdu0.header['RA']
 dec = hdu0.header['DEC']
-#tstart = Decimal("%d.%d" % (hdu0.header['STT_IMJD'], hdu0.header['STT_SMJD']))
 subintoffset = hdu1.header['NSUBOFFS']
-#Ultra-wide band receiver
+nbits = hdu0.header['BITPIX']
+'''
+
+#MJD time for Ultra-wide band receiver
 #tstart = "%.13f" % (Decimal(hdu0.header['STT_IMJD']) + Decimal(hdu0.header['STT_SMJD'] + tsamp * samppersubint * subintoffset )/secperday )
-#19-beams
+#MJD time for 19-beams
 tstart = "%.13f" % (Decimal(hdu0.header['STT_IMJD']) + (Decimal(hdu0.header['STT_SMJD']) + Decimal(hdu0.header['STT_OFFS']) )/secperday)
-# 
 
 # Transfer Fits header MJD --> UTC time
 #Starttime = string.atof(tstart)
@@ -85,36 +79,44 @@ else:
 
 Starttime_utc = datetime.strptime(tmp_t_header[0],"%Y-%m-%d %H:%M:%S.%f")
 Starttime_BJ = Starttime_utc + dt.timedelta(hours=8)
-print Starttime_BJ
+print "file record start time: ", Starttime_BJ
 
-nbits = hdu0.header['BITPIX']
-header = hdu0.header + hdu1.header
-dtype = ''
+#close file
+hdulist.close()
 
 
 #input check 
-
 if (len(sys.argv)==2):
     startn = 0 
     endn = nsubint-1
     startfreq = 400
-    endfreq = nf-1-400
+    endfreq = nf-400
 
-else:
+elif (len(sys.argv)==6):
+    startn=int(sys.argv[1])
+    endn=int(sys.argv[2])
+    startfreq=int(sys.argv[3])
+    endfreq=int(sys.argv[4])
     if startn < 0 or startn >= endn : 
         startn = 0 
+        print "error startn, change to ", startn
     if endn >= nsubint or endn < 0:
         endn = nsubint-1
-    
+        print "error endn, change to ", endn
     if startfreq < 0 or startfreq >= endfreq : 
         startfreq = 400 
+        print "error startfreq, change to ", startfreq
     if endfreq >= nf or endfreq < 0:
-        endfreq = nf-1-400
+        endfreq = nf-400
+        print "error endfreq, change to ", endfreq
+
+else :
+    print "unknown error, quit!"
+    sys.exit()
 
 
 #File information out put
 #name, mjd, time, freq
-
 name = 'filename: '+filename.split('/')[-1]
 mjd = str('MJD: %s' %(tstart))
 time = str('plot length: %s s' % ( (endn - startn)*samppersubint*tsamp) )
@@ -122,17 +124,17 @@ freq = str('plot Frequence: %sMHz - %sMHz' % (round( fch1+startfreq*df, 2 ), rou
 BJtime = Starttime_BJ.strftime("%Y-%m-%d %H:%M:%S")
 
 
-
-print 'freq %s MHz, nchan %d, bw %s MHz' % ( obsfreq, obsnchan, obsbw)
+#information out put
+print "hdu list length ", len(hdulist) 
+print 'data.shape:', data1.shape
 print 'MJD:', tstart
 print 'fch1, df', fch1, df 
-print 'file length %f tsamp %f nsamp %f' %(tsamp*nsamp,tsamp,nsamp)
-print 'data.shape:', data1.shape
+#print 'freq %s MHz, nchan %d, bw %s MHz' % ( obsfreq, obsnchan, obsbw)
+#print 'file length %f tsamp %f nsamp %f' %(tsamp*nsamp,tsamp,nsamp)
 
 # ASCII file out
 bandpassfilename=(filename.split('/')[-1])[:-5]+'.bandpass'
-print "bandpass file name: %s " %(bandpassfilename)
-
+print "out put bandpass file name: %s " %(bandpassfilename)
 
 from pylab import *
 #from matplotlib.ticker import  MultipleLocator
@@ -142,10 +144,12 @@ downsamp = 64
 a,b,c,d,e = data1.shape
 d = (endfreq - startfreq)
 bandpassout = np.zeros((d,c+1))
-for i in range(d): bandpassout[i,0] = fch1+(startfreq+i)*df
+for i in range(d): 
+    bandpassout[i,0] = fch1+(startfreq+i)*df
+
 fig = figure(figsize=(16,4.5*c), dpi=80)
 fig.text(0.1,0.91,name+"\n"+mjd+"\nBJ Time: "+BJtime, fontsize = 15)
-fig.text(0.5,0.91,time+"\n"+freq, fontsize = 15)
+fig.text(0.5,0.91,time+"\n"+freq+"\n", fontsize = 15)
 
 # set plot labels
 floattimelabel = [round(timepoint,1) for timepoint in np.arange(0, (endn - startn)*1.1*samppersubint/downsamp, (endn - startn)*samppersubint/10./downsamp ) ] 
@@ -155,15 +159,15 @@ floatfreqlabel = [round(freqpoint,1) for freqpoint in np.arange(0, (endfreq- sta
 strfreqlabel = [str(round(freqpoint,0)) for freqpoint in np.arange(fch1+startfreq*df, fch1+endfreq*df+(fch1+endfreq*df - (fch1+startfreq*df))/5, (fch1+endfreq*df - (fch1+startfreq*df))/5.)]
 
 for i in range(c):
-    #data = data1[:,:,i,:,:].squeeze().reshape((-1,d))
+
+    #reshape downsample the data
     data = data1[startn:endn,:,i,startfreq:endfreq,:].squeeze().reshape((-1,d))
-    #reshape the data
     l, m = data.shape
     data = data.reshape(l/downsamp, downsamp, d).sum(axis=1)
 
     bandpass = np.sum(data,axis=0)
     bandpassout[:,i+1] = bandpass
-    print data.shape
+    print "shape of output data",data.shape
     #data -= data.mean(axis=0).transpose().astype(np.uint64)
     #subplotnum=int(str(2*c)+'1'+str(2*i+1))
     subplotnum=int(str(c)+str(c)+str(2*i+1))
@@ -200,32 +204,14 @@ for i in range(c):
     #plot(data.sum(axis=1))
     #show()
 #xlabel('time (s)')
-imgfilename=(filename.split('/')[-1])[:-5]+'.png'
-print "img file name", imgfilename
-savefig(imgfilename)
-#clf()
-#if c > 1:
-#    data = data1[:,:,0,:,:].squeeze().reshape((-1,d))
-#else:
-#    data = data1.squeeze().reshape((-1,d))
-#l, m = data.shape
-#data = data.reshape(l/64, 64, d).sum(axis=1)
-#print data.shape
-##data -= data.mean(axis=0).transpose().astype(np.uint64)
-#
-#from pylab import *
-#
-#switch_backend('ps')
-#imshow(data.T, aspect='auto')
-##colorbar()
-##plot(data.sum(axis=0))
-##plot(data.sum(axis=1))
-##show()
-#
-#imgfilename=filename[:-5]+'.png'
-#print "img file name", imgfilename
-#savefig(imgfilename)
 
+imgfilename=(filename.split('/')[-1])[:-5]+'.png'
+print "creating img: ", imgfilename
+savefig(imgfilename)
+print "finish out put img file"
+#clf()
+
+#bandpass out put
 f = open(bandpassfilename, 'w')
 f.write('MHz       pol1       pol2\n')
 for i in range(d):
