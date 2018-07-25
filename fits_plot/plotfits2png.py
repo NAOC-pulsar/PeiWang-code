@@ -119,7 +119,7 @@ else :
 #name, mjd, time, freq
 name = 'filename: '+filename.split('/')[-1]
 mjd = str('MJD: %s' %(tstart))
-time = str('plot length: %s s' % ( (endn - startn)*samppersubint*tsamp) )
+plottime = str('plot length: %s s' % ( (endn - startn)*samppersubint*tsamp) )
 freq = str('plot Frequence: %sMHz - %sMHz' % (round( fch1+startfreq*df, 2 ), round( fch1+endfreq*df, 2 )))
 BJtime = Starttime_BJ.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -149,7 +149,7 @@ for i in range(d):
 
 fig = figure(figsize=(16,4.5*c), dpi=80)
 fig.text(0.1,0.91,name+"\n"+mjd+"\nBJ Time: "+BJtime, fontsize = 15)
-fig.text(0.5,0.91,time+"\n"+freq+"\n", fontsize = 15)
+fig.text(0.5,0.91,plottime+"\n"+freq+"\n", fontsize = 15)
 
 # set plot labels
 floattimelabel = [round(timepoint,1) for timepoint in np.arange(0, (endn - startn)*1.1*samppersubint/downsamp, (endn - startn)*samppersubint/10./downsamp ) ] 
