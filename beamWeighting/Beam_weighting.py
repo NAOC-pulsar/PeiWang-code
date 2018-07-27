@@ -73,8 +73,8 @@ def plotWeight(Nsub, Nchan, Weight):
     Y = range(0, Nchan) 
     X, Y = np.meshgrid(X, Y) 
     Z = Weight
-    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap='rainbow') 
-    fig.show()
+    ax.plot_surface(X, Y, Z.T, rstride=1, cstride=1, cmap='rainbow') 
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -82,11 +82,12 @@ if __name__ == "__main__":
     #check input
     Flag = 0
     if (len(sys.argv)==2):
-        Fitslist = sys.argv[1]
+        #Fitslist = sys.argv[1]
+        Filename = sys.argv[1]
         Flag = 1
         Scale = 0
         Percent = 0
-        beamWeight(filename, Scale, Percent, Flag) 
+        beamWeight(Filename, Scale, Percent, Flag) 
         print 'Reset for the "DAT_WTS"'
     elif (len(sys.argv) == 4):
         #elif (len(sys.argv) == 5):
