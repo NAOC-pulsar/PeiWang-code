@@ -27,8 +27,7 @@ else :
     print 'example:'
     print 'python *.py startn endn startchan endchan FAST.fits'
     print 'python *.py FAST.fits'
-    sys.exit()
-
+    sys.exit() 
 
 starttime=datetime.now()
 print 'start time:',starttime
