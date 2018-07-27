@@ -11,7 +11,7 @@ import commands
 
 #---------------
 #beam weight
-def beamWeight(filename, scale, percent, flag) 
+def beamWeight(filename, scale, percent, flag):
     #settings
     C = 299794580.0
     D = 300.0
