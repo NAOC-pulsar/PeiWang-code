@@ -11,7 +11,7 @@ import commands
 
 #---------------
 #beam weight
-def beamWeight(filename, scale, percent, flag):
+def beamWeight(filename, scale, percent, flag, plotset):
     #settings
     C = 299794580.0
     D = 300.0
@@ -58,7 +58,8 @@ def beamWeight(filename, scale, percent, flag):
     hdulist.close()
     print 'DAT_WTS[',int(Nsub*Percent),',',Nchan,']=', data1['DAT_WTS'][int(Nsub*Percent),Nchan-1], '->', Dat_wts[int(Nsub*Percent),Nchan-1]
     print 'DAT_WTS[',Nsub,',',Nchan,']=', data1['DAT_WTS'][Nsub-1,Nchan-1], '->', Dat_wts[Nsub-1,Nchan-1]
-    plotWeight(Nsub, Nchan, Weight)
+    if (plotset == 1):
+        plotWeight(Nsub, Nchan, Weight)
 
 
 
@@ -83,23 +84,37 @@ if __name__ == "__main__":
     Flag = 0
     if (len(sys.argv)==2):
         #Fitslist = sys.argv[1]
-        Filename = sys.argv[1]
         Flag = 1
+        plotset = 0
         Scale = 0
         Percent = 0
-        beamWeight(Filename, Scale, Percent, Flag) 
+        Filename = sys.argv[1]
         print 'Reset for the "DAT_WTS"'
+        beamWeight(Filename, Scale, Percent, Flag, plotset) 
+
     elif (len(sys.argv) == 4):
         #elif (len(sys.argv) == 5):
         Flag = 0
+        plotset = 0
         Scale = float(sys.argv[1])     # Between 0 and 1
         Percent = float(sys.argv[2])   # Between 0 and 1
         Filename = sys.argv[3]
-        beamWeight(Filename, Scale, Percent, Flag) 
+        beamWeight(Filename, Scale, Percent, Flag, plotset) 
+
+    elif (len(sys.argv) == 5):
+        Flag = 0
+        plotset = 0
+        Scale = float(sys.argv[1])     # Between 0 and 1
+        Percent = float(sys.argv[2])   # Between 0 and 1
+        Filename = sys.argv[3]
+        plotset = int(sys.argv[4])
+        beamWeight(Filename, Scale, Percent, Flag, plotset) 
+
     else :
         print 'Wrong inputs!'
-        print 'Weight Usage: python update_TBIN.py Scale(0-1) Time_percent(0-1) fitslist.txt'
-        print 'Reset  Usage: python update_TBIN.py fitslist.txt'
+        print 'Weight Usage: python *.py Scale(0-1) Time_percent(0-1) filename plotset(1)'
+        print 'Weight Usage: python *.py Scale(0-1) Time_percent(0-1) filename'
+        print 'Reset  Usage: python *.py filename'
         sys.exit()
     
 #-----------------------------------------------------------------------------------------------
