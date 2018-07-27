@@ -74,7 +74,7 @@ def plotWeight(Nsub, Nchan, Weight):
     X, Y = np.meshgrid(X, Y) 
     Z = Weight
     ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap='rainbow') 
-    fit.show()
+    fig.show()
 
 
 if __name__ == "__main__":
