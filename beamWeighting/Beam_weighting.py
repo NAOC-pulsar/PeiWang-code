@@ -59,7 +59,7 @@ def beamWeight(filename, scale, percent, flag, plotset):
     print 'DAT_WTS[',int(Nsub*Percent),',',Nchan,']=', data1['DAT_WTS'][int(Nsub*Percent),Nchan-1], '->', Dat_wts[int(Nsub*Percent),Nchan-1]
     print 'DAT_WTS[',Nsub,',',Nchan,']=', data1['DAT_WTS'][Nsub-1,Nchan-1], '->', Dat_wts[Nsub-1,Nchan-1]
     if (plotset == 1):
-        plotWeight(Nsub, Nchan, Weight)
+        plotWeight(Nsub, Nchan, Dat_wts)
 
 
 
@@ -84,6 +84,7 @@ if __name__ == "__main__":
     Flag = 0
     if (len(sys.argv)==2):
         #Fitslist = sys.argv[1]
+        #Flag = 1 mean reset the weight
         Flag = 1
         plotset = 0
         Scale = 0
