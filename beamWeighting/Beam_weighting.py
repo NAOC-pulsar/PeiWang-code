@@ -38,7 +38,6 @@ def beamWeight(filename, scale, percent, flag):
     Nchan = np.array(data1['DAT_WTS']).shape[1]
     Tau = round(Time_subint * Nsub * Percent)	
     Weight = np.zeros((Nsub,Nchan))
-    print Nsub, Nchan, Tau
     
     for isub in range(0,Nsub):
         Time = Time_subint * isub
@@ -59,22 +58,23 @@ def beamWeight(filename, scale, percent, flag):
     hdulist.close()
     print 'DAT_WTS[',int(Nsub*Percent),',',Nchan,']=', data1['DAT_WTS'][int(Nsub*Percent),Nchan-1], '->', Dat_wts[int(Nsub*Percent),Nchan-1]
     print 'DAT_WTS[',Nsub,',',Nchan,']=', data1['DAT_WTS'][Nsub-1,Nchan-1], '->', Dat_wts[Nsub-1,Nchan-1]
+    plotWeight(Nsub, Nchan, Weight)
 
 
 
 #-------------------------------
 #plot the weight
-def plotWeight(Weight):
+def plotWeight(Nsub, Nchan, Weight):
     from matplotlib import pyplot as plt 
     from mpl_toolkits.mplot3d import Axes3D 
     fig = plt.figure() 
     ax = Axes3D(fig) 
-    X = np.arange(-4, 4, 0.25) 
-    Y = np.arange(-4, 4, 0.25) 
+    X = range(0, Nsub) 
+    Y = range(0, Nchan) 
     X, Y = np.meshgrid(X, Y) 
-    R = np.sqrt(X**2 + Y**2) 
-    Z = np.sin(R) 
+    Z = Weight
     ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap='rainbow') 
+    fit.show()
 
 
 if __name__ == "__main__":
