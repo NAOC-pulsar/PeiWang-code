@@ -3,7 +3,7 @@ import numpy as np
 import fitsio
 import sys
 import math
-import commands
+#import commands
 #from astropy.io import fits
 #from astropy.table import Table
 
@@ -31,9 +31,9 @@ def beamWeight(filename, scale, percent, flag, plotset):
     header0 = hdu0.read_header()
     data1=hdulist[1][:]
     Time_subint = header1['TBIN']*header1['NSBLK']
-    Freq_start = header0['OBSFREQ']-header0['OBSBW']/2.
-    Freq_chann = header0['OBSBW']/header0['OBSNCHAN']
-    
+    Freq_chann = header1['CHAN_BW']
+    Freq_start = header0['OBSFREQ']-(header0['OBSNCHAN']/2.)*Freq_chann
+ 
     Nsub = np.array(data1['DAT_WTS']).shape[0]
     Nchan = np.array(data1['DAT_WTS']).shape[1]
     Tau = round(Time_subint * Nsub * Percent)	
@@ -117,6 +117,3 @@ if __name__ == "__main__":
         print 'Weight Usage: python *.py Scale(0-1) Time_percent(0-1) filename'
         print 'Reset  Usage: python *.py filename'
         sys.exit()
-    
-#-----------------------------------------------------------------------------------------------
-
