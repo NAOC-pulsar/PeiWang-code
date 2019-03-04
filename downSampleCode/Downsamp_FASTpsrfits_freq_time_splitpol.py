@@ -19,8 +19,8 @@ from pylab import *
 if (len(sys.argv)<6 or len(sys.argv)>7):
   	print '\n','Input error!','\n'
   	print '# Example:'
- 	print '   python cut_FASTpsrfits.py startchan endchan startn endn xxx.fits'
-	print 'or python cut_FASTpsrfits.py startchan endchan startn endn Fdsamp xxx.fits'
+ 	print '   python Downsamp_FASTpsrfits_freq_time_splitpol.py startchan endchan startn endn xxx.fits'
+	print 'or python Downsamp_FASTpsrfits_freq_time_splitpol.py startchan endchan startn endn Fdsamp xxx.fits'
 	print '(Fdsamp is downsampling rate on frequency channels, unit in 2^n)','\n'
 	sys.exit()
 elif len(sys.argv) == 6:
@@ -78,7 +78,7 @@ print '       Freq. bandwidth   =', header0['OBSBW']
 print '       Channel number    =', nchan
 print '       Channel width(MHz)=', chan_bw
 print '       data1[\'DATA\']     =', float_data.shape
-hdu0.header['OBSFREQ']=((endfreq-startfreq)*1.0/2+1.0 - ((nchan-1.0)*1.0/2+1))*chan_bw + freq
+hdu0.header['OBSFREQ']=((endfreq-startfreq+1)*1.0/2+startfreq)*chan_bw
 hdu0.header['OBSBW']=chnum*chan_bw*1.0
 hdu0.header['OBSNCHAN']=chnum/Fdsamp*1.0
 print 'Output Number of subints =', linenum
